@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from nn.layers.combine import combine_layers
 from nn.layers.conv2Dnormed import Conv2DNormed
 from nn.layers.scale import DownSample
+from nn.pooling.psp_pooling import PSP_Pooling
 from nn.units.fractal_resnet import FracTALResNet_unit
 
 
