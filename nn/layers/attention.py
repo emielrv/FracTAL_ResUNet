@@ -1,27 +1,26 @@
 import torch
-
+import torch.nn as nn
 from nn.layers.conv2Dnormed import Conv2DNormed
 from nn.layers.ftnmt import FTanimoto
 
-
-class RelFTAttention2D(torch.nn.Module):
-    def __init__(self, nkeys, kernel_size=3, padding=1, nheads=1, norm='BatchNorm', norm_groups=None, ftdepth=5,
-                 **kwards):
+class RelFTAttention2D(nn.Module):
+    def __init__(self, nkeys, kernel_size=3, padding=1, nheads=1, norm='BatchNorm', norm_groups=None, ftdepth=5, **kwargs):
         super().__init__()
 
-        with self.name_scope():
-            self.query = Conv2DNormed(channels=nkeys, kernel_size=kernel_size, padding=padding, _norm_type=norm,
-                                      norm_groups=norm_groups)
-            self.key = Conv2DNormed(channels=nkeys, kernel_size=kernel_size, padding=padding, _norm_type=norm,
-                                    norm_groups=norm_groups)
-            self.value = Conv2DNormed(channels=nkeys, kernel_size=kernel_size, padding=padding, _norm_type=norm,
-                                      norm_groups=norm_groups)
+        self.query = Conv2DNormed(channels=nkeys, kernel_size=kernel_size, padding=padding, _norm_type=norm,
+                                  norm_groups=norm_groups)
+        self.key = Conv2DNormed(channels=nkeys, kernel_size=kernel_size, padding=padding, _norm_type=norm,
+                                norm_groups=norm_groups)
+        self.value = Conv2DNormed(channels=nkeys, kernel_size=kernel_size, padding=padding, _norm_type=norm,
+                                  norm_groups=norm_groups)
 
-            self.metric_channel = FTanimoto(depth=ftdepth, axis=[2, 3])
-            self.metric_space = FTanimoto(depth=ftdepth, axis=1)
+        self.metric_channel = FTanimoto(depth=ftdepth, axis=[2, 3])
+        self.metric_space = FTanimoto(depth=ftdepth, axis=1)
 
-            self.norm = torch.nn.BatchNorm2d(nkeys) if norm == 'BatchNorm' else torch.nn.GroupNorm(
-                num_groups=norm_groups, num_channels=nkeys)
+        if norm == 'BatchNorm':
+            self.norm = nn.BatchNorm2d(nkeys)
+        else:
+            self.norm = nn.GroupNorm(num_groups=norm_groups, num_channels=nkeys)
 
     def forward(self, input1, input2, input3):
         q = torch.sigmoid(self.query(input1))
@@ -39,15 +38,12 @@ class RelFTAttention2D(torch.nn.Module):
 
         return v_cspat
 
-
-class FTAttention2D(torch.nn.Module):
-    def __init__(self, nkeys, kernel_size=3, padding=1, nheads=1, norm='BatchNorm', norm_groups=None, ftdepth=5,
-                 **kwards):
+class FTAttention2D(nn.Module):
+    def __init__(self, nkeys, kernel_size=3, padding=1, nheads=1, norm='BatchNorm', norm_groups=None, ftdepth=5, **kwargs):
         super().__init__()
 
-        with self.name_scope():
-            self.att = RelFTAttention2D(nkeys=nkeys, kernel_size=kernel_size, padding=padding, nheads=nheads, norm=norm,
-                                        norm_groups=norm_groups, ftdepth=ftdepth, **kwards)
+        self.att = RelFTAttention2D(nkeys=nkeys, kernel_size=kernel_size, padding=padding, nheads=nheads, norm=norm,
+                                    norm_groups=norm_groups, ftdepth=ftdepth, **kwargs)
 
     def forward(self, input):
         return self.att(input, input, input)
