@@ -19,14 +19,14 @@ class ResNet_v2_block(nn.Module):
         p = (p0, p1)
 
         if norm_type == 'BatchNorm':
-            self.BN1 = nn.BatchNorm2d(self.nfilters, groups=ngroups)
+            self.BN1 = nn.BatchNorm2d(self.nfilters)
         else:
             self.BN1 = nn.GroupNorm(num_groups=norm_groups, num_channels=self.nfilters)
         self.conv1 = nn.Conv2d(self.nfilters, self.nfilters, kernel_size=self.kernel_size, padding=p,
                                dilation=self.dilation_rate, bias=False, groups=ngroups)
         
         if norm_type == 'BatchNorm':
-            self.BN2 = nn.BatchNorm2d(self.nfilters, groups=ngroups)
+            self.BN2 = nn.BatchNorm2d(self.nfilters)
         else:
             self.BN2 = nn.GroupNorm(num_groups=norm_groups, num_channels=self.nfilters)
         self.conv2 = nn.Conv2d(self.nfilters, self.nfilters, kernel_size=self.kernel_size, padding=p,
